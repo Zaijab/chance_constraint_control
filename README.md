@@ -1,36 +1,64 @@
 # Chance-Constrained Gaussian Mixture Steering
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![JAX](https://img.shields.io/badge/JAX-enabled-green.svg)](https://github.com/google/jax)
+
 This repository reproduces and extends the methodology from **"Chance-Constrained Gaussian Mixture Steering to a Terminal Gaussian Distribution"** by Kumagai & Oguri (2024 IEEE CDC).
 
 ## Overview
 
-The implementation focuses on finite-horizon control of discrete-time linear systems where:
-- Initial state distribution follows a Gaussian Mixture Model (GMM)
-- Terminal state must follow a specified Gaussian distribution  
-- State and control inputs must satisfy chance constraints
-- Solution uses convex optimization with Iterative Risk Allocation (IRA)
+The implementation addresses finite-horizon optimal control of discrete-time linear systems with probabilistic constraints:
+
+- **Initial State**: Gaussian Mixture Model (GMM) distribution capturing multi-modal uncertainty
+- **Terminal Objective**: Steer to a specified target Gaussian distribution
+- **Chance Constraints**: Probabilistic bounds on state and control trajectories
+- **Solution Method**: Convex optimization via Iterative Risk Allocation (IRA)
+
+### Mathematical Problem Formulation
+
+Given a discrete-time linear system:
+```
+x_{k+1} = A_k x_k + B_k u_k + w_k
+```
+
+**Objective**: Find control policy that minimizes expected cost while satisfying:
+- `P(H_k x_k ≤ h_k) ≥ 1 - Δ_k` (state chance constraints)
+- `P(||u_k|| ≤ γ_k) ≥ 1 - Γ_k` (control chance constraints)  
+- Terminal distribution constraint: `x_N ~ N(μ_f, Σ_f)`
 
 ## Key Features
 
-- **JAX-based implementation** for automatic differentiation and JIT compilation
-- **Equinox** for neural network-style modeling of control policies
-- **CVXPy** for convex optimization with chance constraint formulation
-- **Complete reproduction** of paper's numerical example
-- **Monte Carlo validation** of theoretical results
+- **Modern JAX Implementation**: Automatic differentiation, JIT compilation, and GPU acceleration
+- **Equinox Integration**: Neural network-style modeling of control policies and system dynamics
+- **Convex Optimization**: CVXPy integration for deterministic chance constraint reformulation
+- **Complete Paper Reproduction**: All numerical examples from the original paper
+- **Monte Carlo Validation**: Statistical verification of theoretical results
+- **Extensible Architecture**: Support for additional dynamical systems and constraint types
 
 ## Installation
 
+### Prerequisites
+- Python 3.11 or higher
+- CUDA support (optional, for GPU acceleration)
+
+### Install from Source
+
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd chance_constrained_control
+git clone https://github.com/Zaijab/chance_constraint_control.git
+cd chance_constraint_control
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Install in development mode
-pip install -e .
+# Install with development dependencies
+pip install -e ".[dev]"
 ```
+
+### Dependencies
+Core dependencies are automatically managed via `pyproject.toml`:
+- **JAX ecosystem**: `jax`, `equinox`, `optax`, `jaxopt`
+- **Optimization**: `cvxpy`, `scipy`
+- **Scientific computing**: `numpy`, `matplotlib`, `tensorflow_probability`
+- **Development tools**: `pytest`, `black`, `isort`, `mypy`
 
 ## Quick Start
 
@@ -129,20 +157,34 @@ x_{k+1} = [1  0  Δt  0 ] x_k + [Δt²/2   0  ] u_k
 
 ## Development
 
-### Running Tests
+### Testing
+
+Run the full test suite:
 ```bash
 python -m pytest tests/ -v
 ```
 
-### Code Formatting
+Run with coverage reporting:
+```bash
+python -m pytest tests/ --cov=src/chance_control --cov-report=html
+```
+
+### Code Quality
+
+Format code:
 ```bash
 python -m black src/ tests/ examples/
 python -m isort src/ tests/ examples/
 ```
 
-### Type Checking  
+Type checking:
 ```bash
 python -m mypy src/
+```
+
+Lint code:
+```bash
+python -m pyflakes src/
 ```
 
 ## Implementation Notes
@@ -177,6 +219,20 @@ If you use this code, please cite the original paper:
 }
 ```
 
-## License
+## Contributing
 
-This implementation is provided for academic and research purposes. Please refer to the original paper for theoretical contributions.
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork the repository** and create a feature branch
+2. **Follow code style**: Run `black`, `isort`, and `mypy` before committing
+3. **Add tests**: Ensure new functionality is thoroughly tested
+4. **Update documentation**: Include docstrings and update README if needed
+5. **Submit a pull request** with a clear description of changes
+
+### Reporting Issues
+
+Please use GitHub Issues to report:
+- Bugs or unexpected behavior
+- Feature requests or enhancement suggestions
+- Documentation improvements
+- Performance issues
